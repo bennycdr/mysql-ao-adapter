@@ -25,16 +25,16 @@ class MySQLSelect(BaseAction):
         user = MySQLUser(data)
         adapter = MySQLAdapter(target, self.logger)
         result = {}
-            try:
-                connection = adapter.connect_to_mysql(user)
-                with connection.cursor() as cursor:
-                    cursor.execute(sql)
-                    result[self.return_query] = cursor.fetchall()
-                    result[self.row_count] = len(result[self.return_query])
-                    self.logger.info("Returning {} to Result Engine.".format(result))
-                return result
-            except MySQLError as e:
-                self.logger.error("Filed to verify target. Caused=%s", e.__cause__)
-                self.raise_action_error('102', e.__cause__)
-            finally:
-                connection.close()
+        try:
+            connection = adapter.connect_to_mysql(user)
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+                result[self.return_query] = cursor.fetchall()
+                result[self.row_count] = len(result[self.return_query])
+                self.logger.info("Returning {} to Result Engine.".format(result))
+            return result
+        except MySQLError as e:
+            self.logger.error("Filed to verify target. Caused=%s", e.__cause__)
+            self.raise_action_error('102', e.__cause__)
+        finally:
+            connection.close()
