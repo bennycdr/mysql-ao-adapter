@@ -1,10 +1,11 @@
-"""Module for the http server classes. """
+"""Module for creating web server."""
 
-import BaseHTTPServer
+from six.moves.socketserver import ForkingMixIn  # pylint: disable=relative-import
+from six.moves import BaseHTTPServer
 
 
-class WebServer(BaseHTTPServer.HTTPServer):
-    """Class representing an http server. """
+class WebServer(ForkingMixIn, BaseHTTPServer.HTTPServer):
+    """Class for creating web server."""
 
     def __init__(self, routes_repo, options, *args, **kw):
         self.timeout = options.timeout_milliseconds/1000
