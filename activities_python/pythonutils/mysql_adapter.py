@@ -9,7 +9,6 @@ from requests import ReadTimeout
 from requests import Timeout
 
 from activities_python.constants.basic_constants import BasicConstants
-from activities_python.pythonutils.models.template_token import TemplateToken
 from activities_python.pythonutils.mysql_error import MySQLError
 from .utils import get_proxies
 
