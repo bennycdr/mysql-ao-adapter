@@ -1,12 +1,12 @@
 """Module for the sample adapter classes. """
 
-from activities_python.common.action_support.base import BaseAction
-from activities_python.pythonutils.models.template_launch_params import TemplateLaunchParams
-from activities_python.pythonutils.models.template_target import TemplateTarget
-from activities_python.pythonutils.models.template_user import TemplateUser
-from activities_python.pythonutils.template_adapter import TemplateAdapter
-from activities_python.pythonutils.template_error import TemplateError
-from activities_python.pythonutils.utils import check_input_params
+from ..common.action_support.base import BaseAction
+from ..pythonutils.models.template_launch_params import TemplateLaunchParams
+from ..pythonutils.models.template_target import TemplateTarget
+from ..pythonutils.models.template_user import TemplateUser
+from ..pythonutils.template_adapter import TemplateAdapter
+from ..pythonutils.template_error import TemplateError
+from ..common.action_support.base import raise_action_error, check_input_params
 
 
 class ActionQuery2(BaseAction):
@@ -29,4 +29,4 @@ class ActionQuery2(BaseAction):
             return info
         except TemplateError as e:
             self.logger.error("Action failed. Status=%s, Response=%s", e.status_code, e.response)
-            self.raise_action_error(e.status_code, e.message)
+            raise_action_error(400, e)

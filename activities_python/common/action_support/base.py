@@ -1,37 +1,30 @@
-"""Module for action base classes. """
+"""Module with base class for actions."""
 
 import abc
 import six
 
-from activities_python.common.action_support.action_error import ActionError
-from activities_python.common.factories.logger import produce_logger
+from ..factories.logger import produce_logger
+from .action_error import ActionError
 
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseAction(object):
-    """Action base class. """
+class BaseAction:
+    """Base class for actions."""
+
     logger = {}
     lh_options = {}
     proxies = {}
 
-    def check_input_params(self, data, param):
-        """Verify the data contains the given parameter, or raise an ActionError. """
-        if param not in data:
-            self.raise_action_error(400, param + ' field is required')
+    def __init__(self):
+        """Constructor."""
 
     def create_logger(self, options):
-        """Create a new logger instance. """
+        """Function to create logger from factory."""
         self.logger = produce_logger(options)
         return self
 
-    def raise_action_error(self, code, message):
-        """Raise an ActionError with the given code and error message. """
-        if self.logger:
-            self.logger.debug("raising action error - code: %s, message: %s", code, message)
-        raise ActionError(code, message)
-
     def add_lh_options(self, lh_options):
-        """Add the given LH Options. """
+        """lh_options setter."""
         self.lh_options = lh_options
 
     def add_proxies(self, proxies):
@@ -40,9 +33,14 @@ class BaseAction(object):
 
     @abc.abstractmethod
     def invoke(self, data, context):
-        """Invoke this action. """
-        pass
+        """Abstract method for invoke action."""
 
-    def __init__(self):
-        self.lh_options = None
-        self.logger = None
+
+def raise_action_error(code, message):
+    """Function to raise standard error."""
+    raise ActionError(code, message)
+
+
+def check_input_params(data, param):
+    """Function to check input parameters."""
+    return param in data or raise_action_error(400, param + ' field is required')

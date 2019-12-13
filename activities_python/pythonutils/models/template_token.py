@@ -1,10 +1,10 @@
 """Module for the adapter token."""
 
-from activities_python.pythonutils.template_error import TemplateError
-from activities_python.pythonutils.utils import check_reponse_params
+from ..template_error import TemplateError
+from ..utils import check_reponse_params
 
 
-class TemplateToken(object):
+class TemplateToken():
     """Class representing the adapter token."""
 
     TOKEN = "token"

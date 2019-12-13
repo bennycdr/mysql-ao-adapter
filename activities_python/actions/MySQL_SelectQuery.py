@@ -1,12 +1,11 @@
 """Module for the sample adapter classes. """
 
-from activities_python.common.action_support.base import BaseAction
-from activities_python.pythonutils.mysql_error import MySQLError
-from activities_python.pythonutils.models.MySQL_target import MySQLTarget
-from activities_python.pythonutils.models.MySQL_user import MySQLUser
-from activities_python.pythonutils.mysql_adapter import MySQLAdapter
-from activities_python.pythonutils.utils import check_input_params
-from activities_python.pythonutils.utils import get_optional_value
+from ..common.action_support.base import BaseAction
+from ..pythonutils.models.MySQL_target import MySQLTarget
+from ..pythonutils.models.MySQL_user import MySQLUser
+from ..pythonutils.mysql_adapter import MySQLAdapter
+from ..pythonutils.mysql_error import MySQLError
+from ..common.action_support.base import raise_action_error, check_input_params
 
 
 class MySQLSelect(BaseAction):

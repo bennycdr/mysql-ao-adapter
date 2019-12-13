@@ -1,9 +1,8 @@
-"""Module for action errors. """
+"""Module with action error class."""
 
 
 class ActionError(Exception):
-    """Class representing an Action error. """
-
+    """Class for action standard error."""
     def __init__(self, code, message):
         super(ActionError, self).__init__(message)
         self.code = code

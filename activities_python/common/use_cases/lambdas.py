@@ -1,20 +1,17 @@
-"""Module for Lambda use cases. """
-
+"""Module containing use case for executing inside lambda function."""
 import logging
 
-from activities_python.common.controllers.function import FunctionController
-from activities_python.common.factories.options import produce_options
+from ..factories.options import produce_options
+from ..controllers.function import FunctionController
 
 
-class LambdasUseCase(object):
-    """Class presenting a Lambda use case. """
-
-    def __init__(self):
-        self.logger = None
+class LambdasUseCase:
+    """Class containing use case for executing inside lambda function."""
 
     def execute(self, event, context):
-        """Execute this use case. """
-        self.logger = logging.getLogger(__name__)
+        """Main function for execution of use case."""
+        # pylint: disable=no-self-use
+        logger = logging.getLogger(__name__)
         try:
             opts = produce_options(True)
             if opts.log_level:
@@ -23,5 +20,5 @@ class LambdasUseCase(object):
             result = controller.handle(event, context)
             return result.response
         except ValueError as e:
-            self.logger.error("Value error: %s", str(e))
+            logger.error("Value error: %s", e)
             exit()

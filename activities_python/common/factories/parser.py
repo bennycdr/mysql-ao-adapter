@@ -1,9 +1,10 @@
-"""Module for the adapter arguments parser. """
+"""Module for the adapter arguments parser."""
+
 import argparse
 
 
 def produce_parser():
-    """Return a new parser instance. """
+    """Return a new parser instance."""
     parser = argparse.ArgumentParser(description='MySQL Target adapter.')
     parser.add_argument("--log_level", dest="log_level", help="Set the logging level",
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])

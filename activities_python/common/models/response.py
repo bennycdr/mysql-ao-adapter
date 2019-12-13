@@ -1,5 +1,4 @@
-"""Module for the response model. """
-
+"""Module containing definitions for http response."""
 import collections
 
 ControllerResponse = collections.namedtuple('ControllerResponse', ['status', 'mime', 'response', 'jsonize'])

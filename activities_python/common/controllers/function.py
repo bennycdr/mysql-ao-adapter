@@ -1,40 +1,42 @@
-"""Module for the Function controller classes. """
+"""Module with class for function controllers."""
 
 import json
-import six
+import traceback
 
-from activities_python.common.action_support.action_error import ActionError
-from activities_python.common.constants.controller import ControllerConstants
-from activities_python.common.controllers.base import BaseController
-from activities_python.common.factories.logger import produce_logger
-from activities_python.common.models.response import ControllerResponse
-from activities_python.constants.basic_constants import BasicConstants
-from activities_python.events.event_resolver import resolve_event
 from activities_python.pythonutils.utils import dump_excluding_secrets, create_proxies
+
+from ...events.event_resolver import resolve_event
+from .base import BaseController
+from ..models.response import ControllerResponse
+from ..constants.controller import ControllerConstants
+from ..factories.logger import produce_logger
+from ..action_support.action_error import ActionError
 
 
 class FunctionController(BaseController):
-    """Controller for the Functions path. """
+    """Class containing controller for functions."""
 
     def __init__(self, options):
+        """Contructor."""
         self.options = options
         self.logger = produce_logger(options)
+        super(FunctionController, self).__init__()
 
     def handle(self, data, context):
-        """Handle the incoming request to this controller. """
         # pylint: disable=broad-except
         try:
-            if isinstance(data, six.string_types):
-                input_object = json.loads(data)
-            else:
-                input_object = data
+            # if isinstance(data, six.string_types):
+            input_object = json.loads(data)
+            # else:
+            #    input_object = data
             input_type = input_object['type']
             self.logger.info("Got event type %s", input_type)
             lh_options = {}
             proxy_options = {}
-            no_proxy = False
+            ignore_proxy = False
             if 'lh_options' in input_object:
                 lh_options = input_object['lh_options']
+                self.logger.info("Got lh_options %s", lh_options)
                 if lh_options and 'proxy_options' in lh_options:
                     proxy_options = lh_options['proxy_options']
             event = input_object['config']
@@ -43,45 +45,52 @@ class FunctionController(BaseController):
             if not handler:
                 raise ValueError("Unresolved event type: " + input_type)
             handler.add_lh_options(lh_options)
-            if 'no_proxy' in event:
-                no_proxy = event['no_proxy']
-            if proxy_options and not no_proxy:
+            if 'ignore_proxy' in event:
+                ignore_proxy = event['ignore_proxy']
+            if proxy_options and not ignore_proxy:
                 proxies = create_proxies(proxy_options)
                 if proxies:
                     handler.add_proxies(proxies)
             result = handler.invoke(event, context)
-            return self.__action_success(result)
+            return action_success(result)
         except ActionError as e:
             self.logger.error("Raised action error code=%s, message=%s", e.code, e)
-            return self.__action_error(str(e), e.code)
-        except Exception as e:
+            return action_error(str(e), e.code)
+        except Exception:
+            formatted_lines = traceback.format_exc().splitlines()
+            e = "Error processing request: " + str(formatted_lines[-1])
             self.logger.exception("Exception during processing request")
-            return self.__action_error(str(e), None)
+            return action_error(str(e), None)
 
-    def __action_success(self, result):
-        response = {
-            ControllerConstants.ACTIVITY_STATUS: ControllerConstants.SUCCESS_STATUS,
+
+def action_success(result):
+    """Function to get response in case of success."""
+    response = {
+        ControllerConstants.ACTIVITY_STATUS: ControllerConstants.SUCCESS_STATUS,
+    }
+    if result:
+        response[ControllerConstants.RESPONSE] = result
+    return create_response(response)
+
+
+def action_error(error_text, code):
+    """Function to get response in case of error."""
+    response = {
+        ControllerConstants.ACTIVITY_STATUS: ControllerConstants.FAILED_STATUS,
+        ControllerConstants.ERROR_DESC: {
+            ControllerConstants.ERROR_MESSAGE: error_text,
         }
-        if result:
-            response[ControllerConstants.RESPONSE] = result
-        return self.__create_response(response)
+    }
+    if code:
+        response[ControllerConstants.ERROR_DESC][ControllerConstants.ERROR_CODE] = str(code)
+    return create_response(response)
 
-    def __action_error(self, error_text, code):
-        response = {
-            ControllerConstants.ACTIVITY_STATUS: ControllerConstants.FAILED_STATUS,
-            ControllerConstants.ERROR_DESC: {
-                ControllerConstants.ERROR_MESSAGE: error_text,
-            }
-        }
-        if code:
-            response[ControllerConstants.ERROR_DESC][ControllerConstants.ERROR_CODE] = str(code)
-        return self.__create_response(response)
 
-    @staticmethod
-    def __create_response(result):
-        return ControllerResponse(
-            response=result,
-            status=200,
-            mime=BasicConstants.CONTENT_TYPE_VALUE,
-            jsonize=True,
-        )
+def create_response(result):
+    """Function to create response."""
+    return ControllerResponse(
+        response=result,
+        status=200,
+        mime='application/json',
+        jsonize=True,
+    )

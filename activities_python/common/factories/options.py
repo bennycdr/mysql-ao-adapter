@@ -1,7 +1,7 @@
-"""Module for the factories options. """
+"""Module for the factories options."""
 
-from activities_python.common.factories.parser import produce_parser
-from activities_python.common.models.options import Options
+from ..models.options import Options
+from .parser import produce_parser
 
 
 def produce_options(is_lambda):

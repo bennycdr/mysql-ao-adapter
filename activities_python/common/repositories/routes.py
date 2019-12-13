@@ -1,20 +1,17 @@
-"""Module for the routes repository. """
-
+"""Module containing repository of routes."""
 import re
 
-from activities_python.common.controllers import function
-from activities_python.common.controllers import health
-from activities_python.common.controllers import not_found
+from ..controllers import function, health, not_found
 
 
-class RoutesRepository(object):
-    """The routes repository class. """
-
+class RoutesRepository:
+    """Class for routes repository."""
     PATH = 'path'
     METHOD = 'method'
     FACTORY = 'factory'
 
     def __init__(self):
+        """Constructor."""
         self.routes = [
             {
                 self.PATH: r'^/api/v1/function$',
@@ -29,7 +26,7 @@ class RoutesRepository(object):
         ]
 
     def get_controller(self, method, path, options):
-        """Return the controller for the given path. """
+        """Method for getting correct controller for provided route."""
         for route in self.routes:
             if re.match(route[self.PATH], path) and route[self.METHOD] == method:
                 return route[self.FACTORY](options)

@@ -24,8 +24,13 @@ Run adapter locally
 After running certificate creation commands you will have the following files created:
     "secrets/ssl/cert/certificate.pem"
     "secrets/ssl/cert/private_key.pem"
+    "secrets/ssl/cert/.disable_cert_validation"
 
-If you want to use your own certificates, then add following environment variables:
+Add following environment variables:
+    export CERTFILE=path_to_certificate.pem
+    export PKEYFILE=path_to_private_key.pem
+
+If you want to use your own certificates, set following environment variables:
     export CERTFILE=path_to_certificate.pem
     export PKEYFILE=path_to_private_key.pem
     export CAFILE=path_to_ca_certificate.pem

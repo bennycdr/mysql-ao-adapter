@@ -1,7 +1,7 @@
 """Module for basic constants. """
 
 
-class BasicConstants(object):
+class BasicConstants():
     """Class to encapsulate commonly used constants. """
 
     GET = 'GET'
@@ -29,6 +29,3 @@ class BasicConstants(object):
     VERIFY_TARGET_TYPE = TARGET + '.' + TARGET_NAME
     SELECT_NAME = 'select_from_mysql_table'
     SELECT_TYPE = ACTIVITY + '.' + SELECT_NAME
-
-    def __init__(self):
-        pass

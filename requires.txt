@@ -1,4 +1,6 @@
 python-dotenv
 six
 pymysql
+responses
 requests
+pyyaml

@@ -21,7 +21,6 @@ All these requests are samples of what payload coming to adapter may look like
 {
     "type": "activity.create_template",
     "config": {
-        "no_proxy": false,
         "template_name":"T123",
         "host": "n180.template.com",
         "username": "alex",
@@ -32,16 +31,16 @@ All these requests are samples of what payload coming to adapter may look like
     "lh_options": {
         "proxy_options": {
     	    "http_proxy": {
-	    	    "url": "http://proxy.com:3128",
-	    	    "username":"proxyclient",
-	    	    "password":"proxypassword"
-    		},
-    		"https_proxy": {
-	    		"url": "http://proxy.com:3128",
-	    	    "username":"proxyclient",
-	    	    "password":"proxypassword"
-    		},
-    		"bypass_list":"*.template.com,domain.com"
+	        "url": "http://proxy.com:3128",
+	        "username":"proxyclient",
+	        "password":"proxypassword"
+    	    },
+    	    "https_proxy": {
+	    	"url": "http://proxy.com:3128",
+	        "username":"proxyclient",
+	        "password":"proxypassword"
+    	    },
+    	    "bypass_list":"*.template.com,domain.com"
     	},
     	"secure_keys": [ "password"]
 	}

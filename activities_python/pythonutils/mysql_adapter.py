@@ -1,18 +1,19 @@
-"""Module containting the template adapter classes.  """
+""Module containting the template adapter classes.  """
 import pymysql.cursors
 import requests
 
-from requests import ConnectionError
+from requests import ConnectionError  # pylint: disable=redefined-builtin
 from requests import ConnectTimeout
 from requests import HTTPError
 from requests import ReadTimeout
 from requests import Timeout
 
-from activities_python.constants.basic_constants import BasicConstants
-from activities_python.pythonutils.mysql_error import MySQLError
+from ..constants.basic_constants import BasicConstants
+from .mysql_error import MySQLError
 from .utils import get_proxies
 
-class MySQLAdapter(object):
+
+class MySQLAdapter():
     """The Template Adapter class. """
 
     def __init__(self, target, logger):

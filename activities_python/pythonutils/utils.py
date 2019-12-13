@@ -2,11 +2,11 @@
 
 import copy
 
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse  # pylint: disable=relative-import
 from requests.utils import is_ipv4_address, is_valid_cidr, address_in_network
 
-from activities_python.common.action_support.action_error import ActionError
-from activities_python.pythonutils.mysql_error import MySQLError
+from ..common.action_support.base import raise_action_error
+from .mysql_error import MySQLError
 
 
 def get_optional_value(data, key, default):
@@ -18,21 +18,10 @@ def get_optional_value(data, key, default):
     return result
 
 
-def check_input_params(data, param):
-    """Verify the data contains the required input parameter, or raise an error. """
-    if param not in data:
-        raise_action_error(400, param + ' field is required')
-
-
 def check_reponse_params(data, param):
     """Verify the data contains the required response parameter, or raise an error. """
     if param not in data:
         raise MySQLError(503, "No " + param + " in response", data)
-
-
-def raise_action_error(code, message):
-    """Raise an ActionError with the specified code and error message. """
-    raise ActionError(code, message)
 
 
 def dump_excluding_secrets(event, lh_options):
@@ -45,12 +34,11 @@ def dump_excluding_secrets(event, lh_options):
     secure_keys = lh_options['secure_keys']
     if isinstance(secure_keys, (list, tuple)):
         return exclude_secrets_from_list(secure_keys, dump_event)
-    elif isinstance(secure_keys, str):
+    if isinstance(secure_keys, str):
         if secure_keys != "":
             dump_event[secure_keys] = "*****"
         return dump_event
-    else:
-        return event
+    return event
 
 
 def exclude_secrets_from_list(secure_keys, dump_event):
@@ -105,6 +93,7 @@ def create_proxies(proxy_options):
 
 def create_proxy_url(url, username, password):
     """Function to create a proxy url."""
+
     if url == "":
         return ""
     parse_url = urlparse(url)
@@ -118,6 +107,7 @@ def create_proxy_url(url, username, password):
 
 def bypass_proxies(url, no_proxy):
     """Returns whether we should bypass proxies or not."""
+
     parsed = urlparse(url)
     bypass = False
     if no_proxy == "":
@@ -132,7 +122,9 @@ def bypass_proxies(url, no_proxy):
     for host in no_proxy:
         if host == "*":
             bypass = True
-        if host == parsed.hostname or host == host_with_port:
+        if host == parsed.hostname:
+            bypass = True
+        if host == host_with_port:
             bypass = True
         if host.startswith(chars):
             host = host.lstrip('*')

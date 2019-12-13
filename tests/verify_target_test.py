@@ -30,7 +30,7 @@ class TestVerifyTarget(unittest.TestCase):
             "host": "domain.com",
             "port": 8234
         }, {})
-        self.assertEquals({"verified": True}, result)
+        self.assertEqual({"verified": True}, result)
 
     @responses.activate
     def test_good_with_proxy(self):

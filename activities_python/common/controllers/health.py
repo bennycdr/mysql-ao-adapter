@@ -1,15 +1,16 @@
-"""Module for health check controller classes. """
+"""Module for health check controller classes."""
 
-from activities_python.common.controllers.base import BaseController
-from activities_python.common.factories.logger import produce_logger
-from activities_python.common.models.response import ControllerResponse
+from .base import BaseController
+from ..models.response import ControllerResponse
+from ..factories.logger import produce_logger
 
 
 class HealthController(BaseController):
-    """Controller for the health check path. """
+    """Class for reporting health check."""
 
     def __init__(self, options):
         self.logger = produce_logger(options)
+        BaseController.__init__(self)
 
     def handle(self, data, context):
         """Handle the incoming request to this controller. """

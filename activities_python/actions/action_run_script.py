@@ -1,30 +1,31 @@
-"""Module for the sample adapter classes."""
+"""Module with action execute python script."""
 
 import os
 import sys
-import time
-
-from multiprocessing import Manager, Process
-
+import traceback
+from multiprocessing import Process, Queue
 import six
 
-from activities_python.common.action_support.base import BaseAction
-from activities_python.common.constants.controller import ControllerConstants
+from ..common.action_support.base import BaseAction, raise_action_error, check_input_params
+from ..common.constants.controller import ControllerConstants
 
 
 class ActionQuery3(BaseAction):
-    """Sample Class for executing a python script action in jail. """
+    """Main Class for executing a python script action."""
 
     def __init__(self, jail_options):
-        super(ActionQuery3, self).__init__()
+        """Constructor."""
         self.jail_options = jail_options
+        super(ActionQuery3, self).__init__()
 
     def invoke(self, data, context):
+        """Invoke adapter action."""
+        # pylint: disable=broad-except
         try:
-            self.logger.info('Invoked ExecutePythonScriptQuery')
+            self.logger.info('Invoked ActionQuery3')
 
             # check input parameters
-            self.check_input_params(data, "script")
+            check_input_params(data, "script")
 
             script = data["script"]
             timeout = abs(data.get("action_timeout", 180))  # same default as in console
@@ -32,14 +33,14 @@ class ActionQuery3(BaseAction):
             script_queries = {}
             script_arguments = []
             if "script_queries" in data:
-                for k in data['script_queries']:
-                    script_queries[k['script_query_name']] = k['script_query_type'] + " " + k['script_query']
+                for sqs in data['script_queries']:
+                    script_queries[sqs['script_query_name']] = sqs['script_query_type'] + " " + sqs['script_query']
             if "script_arguments" in data:
-                for args in data["script_arguments"]:
-                    if isinstance(args, six.string_types):
-                        script_arguments.append(args)
+                for query in data["script_arguments"]:
+                    if isinstance(query, six.string_types):
+                        script_arguments.append(query)
                     else:
-                        script_arguments.append(str(args))
+                        script_arguments.append(str(query))
 
             opts = ExecuterOptions()
             opts.timeout = timeout
@@ -49,16 +50,18 @@ class ActionQuery3(BaseAction):
             opts.jail_options = self.jail_options
             opts.logger = self.logger
             executer = Executer(opts)
+
             result = executer.run_parent()
             if "Error:" in result:
-                self.raise_action_error(400, result)
+                raise_action_error(400, result)
             return result
-        except Exception as e:  # pylint: disable=broad-except
-            self.raise_action_error(400, e)
+        except Exception as e:
+            raise_action_error(400, e)
 
 
-class ExecuterOptions(object):
-    """Class for Executer options. """
+class ExecuterOptions:
+    """Class for Executer options."""
+
     timeout = 0
     script = ""
     script_arguments = []
@@ -66,68 +69,70 @@ class ExecuterOptions(object):
     jail_options = {}
     logger = None
 
-    def __init__(self):
-        pass
-
 
 class Executer(Process):
-    """Class for running a Python scripts. """
+    """Class for running a Python scripts."""
 
     __STARTED = "started"
     __OUTPUT = "output"
     __EXCEPTION = "exception"
 
     def __init__(self, options):
-        super(Executer, self).__init__()
-        self.manager = Manager()
-        self.shared_dict = self.manager.dict()
+        """Constructor."""
         self.options = options
+        self.queue = Queue()
+        super(Executer, self).__init__()
 
+    # override Process.run
     def run(self):
-        """Override for Process.run() """
+        """Function to run specified command in subprocess."""
+        # pylint: disable=broad-except
         # jailing
-        self.shared_dict[self.__STARTED] = time.time()
+
         if self.options.jail_options[ControllerConstants.IS_JAILED]:
             self.options.logger.info("Executing script in chroot jail")
             os.chroot(self.options.jail_options[ControllerConstants.JAIL_DIR])
+            os.chdir('/')
             os.setgid(self.options.jail_options[ControllerConstants.USER_GID])  # Important! Set GID first
             os.setuid(self.options.jail_options[ControllerConstants.USER_UID])
         else:
             self.options.logger.info("Executing script unjailed")
         try:
             output = run_script(self.options.script, self.options.script_arguments, self.options.script_queries)
-            self.shared_dict[self.__OUTPUT] = output
-        except Exception as e:  # pylint: disable=broad-except
-            self.shared_dict[self.__EXCEPTION] = e
+            self.queue.put(output)
+
+        except Exception as e:
+            raise Exception(e)
 
     def run_parent(self):
-        """Execute self.run in forked process."""
+        """Function to run specified command in parent process."""
+        # execute self.run in forked process
         self.start()
         self.join(self.options.timeout)
+        output = self.queue.get()
         if self.is_alive():
             self.terminate()
             raise Exception('Activity timeout')
-        if self.__EXCEPTION in self.shared_dict:
-            raise self.shared_dict[self.__EXCEPTION]
-        return self.shared_dict[self.__OUTPUT]
+        return output
 
 
-class FileCacher(object):
-    """Class for caching the stdout text. """
+class FileCacher:
+    """Class for caching the stdout text."""
 
     def __init__(self):
+        """Constructor."""
         self.reset()
 
     def reset(self):
-        """Initialize the output cache."""
+        """Function to reset cacher."""
         self.out = []
 
     def write(self, line):
-        """Write the specified line to the cache."""
+        """Function to write data."""
         self.out.append(line)
 
     def flush(self):
-        """Flush the cache."""
+        """Function to flush buffer."""
         if '\n' in self.out:
             self.out.remove('\n')
         output = '\n'.join(self.out)
@@ -135,47 +140,44 @@ class FileCacher(object):
         return output
 
 
-class Shell(object):
-    """Class for running a Python script as interactive interpreter. """
+class Shell:
+    """Class for running a Python script as interactive interpreter."""
 
     def __init__(self, arguments):
+        """Constructor."""
         self.stdout = sys.stdout
         self.cache = FileCacher()
-        self.set_arguments(arguments)
+        set_arguments(arguments)
         self.locals = {"__name__": "__console__", "__doc__": None}
 
     def run_code(self, script):
-        """Run the specified script."""
-        # pylint: disable=broad-except,bare-except
+        """Function to run code."""
+        # pylint: disable=broad-except, exec-used, try-except-raise
         try:
             sys.stdout = self.cache
             try:
-                # pylint: disable=exec-used
                 exec(script, self.locals)
             except SystemExit:
                 raise
-            except:  # noqa: E722
-                e = sys.exc_info()[1:2]
-                return "Error: " + str(e)
+            except SyntaxError:
+                formatted_lines = traceback.format_exc().splitlines()
+                e = str(formatted_lines[-3]) + "\n" + str(formatted_lines[-2]) + "\n" + str(formatted_lines[-1])
+                return "Error: " + e
+            except Exception:
+                formatted_lines = traceback.format_exc().splitlines()
+                e = str(formatted_lines[-2]) + "\n" + str(formatted_lines[-1])
+                return "Error: " + e
             sys.stdout = self.stdout
             output = self.cache.flush()
             return output
-        except:  # noqa: E722
-            e = sys.exc_info()[1:2]
-            return "Error: " + str(e)
-
-    @classmethod
-    def set_arguments(cls, arguments):
-        """Set arguments to be passed to the script."""
-        if arguments:
-            sys.argv[1:] = ""
-            for arg in arguments:
-                sys.argv.append(arg)
-        return
+        except BaseException:
+            formatted_lines = traceback.format_exc().splitlines()
+            e = str(formatted_lines[-2]) + " " + str(formatted_lines[-1])
+            return "Error: " + e
 
 
 def run_script(script, script_arguments, script_queries):
-    """Runs the Python script with arguments and interactive queries. """
+    """Run the Python script with arguments and interactive queries."""
     try:
         shell = Shell(script_arguments)
         result = {}
@@ -185,21 +187,21 @@ def run_script(script, script_arguments, script_queries):
         result["response_body"] = out
         if script_queries:
             result["script_queries"] = {}
-            for key in script_queries.keys():
-                query = script_queries[key]
-                parts = query.split()
-                query = "print " + parts[1]
+            for key in list(script_queries.keys()):
+                query_val = script_queries[key]
+                parts = query_val.split()
+                query = "print(" + parts[1] + ")"
                 out = shell.run_code(query)
-                if parts[0] == "str":
+                if parts[0] == "string":
                     if isinstance(out, six.string_types):
                         output = out
                     else:
                         output = str(out)
-                elif parts[0] == "int":
+                elif parts[0] == "integer":
                     output = int(out)
-                elif parts[0] == "bool":
+                elif parts[0] == "boolean":
                     output = out.lower() in ("yes", "true", "t", "1")
-                elif parts[0] == "float":
+                elif parts[0] == "number":
                     output = float(out)
                 else:
                     output = out
@@ -210,3 +212,11 @@ def run_script(script, script_arguments, script_queries):
         return result
     except Exception as e:
         raise Exception(e)
+
+
+def set_arguments(arguments):
+    """Function to set arguments."""
+    if arguments:
+        sys.argv[1:] = ""
+        for arg in arguments:
+            sys.argv.append(arg)

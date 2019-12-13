@@ -1,8 +1,8 @@
 """Module for the adapter target classes. """
 import pymysql.cursors
 
-from activities_python.pythonutils.utils import check_input_params
-from activities_python.pythonutils.utils import get_optional_value
+from ..utils import get_optional_value
+from ...common.action_support.base import check_input_params
 
 
 class MySQLTarget(object):

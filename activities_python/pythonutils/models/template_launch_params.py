@@ -1,7 +1,7 @@
 """Module for the adapter launch parameters. """
 
 
-class TemplateLaunchParams(object):
+class TemplateLaunchParams():
     """Class representing the adapter launch parameters. """
 
     EXTRA_VARS = "extra_vars"

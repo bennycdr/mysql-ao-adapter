@@ -1,13 +1,13 @@
-"""Module for the base controller. """
+"""Module with base class for controllers."""
+
 import abc
 import six
 
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseController(object):
-    """The Base Controller class. """
+class BaseController():
+    """Base controller class."""
 
     @abc.abstractmethod
     def handle(self, data, context):
-        """Handle the incoming request to this controller. """
-        pass
+        """Abstract method for handling request."""

@@ -4,7 +4,7 @@ from activities_python.pythonutils.utils import dump_excluding_secrets, create_p
 from activities_python.common.action_support.action_error import ActionError
 
 
-class TestDumpExcludingSecrets(unittest.TestCase):
+class TestDump_Excluding_Secrets(unittest.TestCase):
     lh_options = {
         "secure_keys": ["password", "key", "credentials.password", "credentials3.credentials.password"]
     }
@@ -35,7 +35,7 @@ class TestDumpExcludingSecrets(unittest.TestCase):
             },
             "key": "*****",
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_part1(self):
         lh_options = {
@@ -54,26 +54,26 @@ class TestDumpExcludingSecrets(unittest.TestCase):
             },
             "key": "*****",
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_empty_keys(self):
         lh_options = {
             "secure_keys": []
         }
         dump = dump_excluding_secrets(self.event, lh_options)
-        self.assertEquals(self.event, dump)
+        self.assertEqual(self.event, dump)
 
     def test_empty_options(self):
         lh_options = {}
         dump = dump_excluding_secrets(self.event, lh_options)
-        self.assertEquals(self.event, dump)
+        self.assertEqual(self.event, dump)
 
     def test_wrong_keys(self):
         lh_options = {
             "secure_keys": ["passwd", "cred.password"]
         }
         dump = dump_excluding_secrets(self.event, lh_options)
-        self.assertEquals(self.event, dump)
+        self.assertEqual(self.event, dump)
 
     def test_wrong_and_correct_keys(self):
         lh_options = {
@@ -92,7 +92,7 @@ class TestDumpExcludingSecrets(unittest.TestCase):
             },
             "key": "key",
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
 
 class TestCreateProxies(unittest.TestCase):
@@ -115,7 +115,7 @@ class TestCreateProxies(unittest.TestCase):
             'https': 'http://proxyclient:proxypassword@domain.com:3128',
             'no_proxy': "*.cisco.com"
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_empty_username(self):
         ops = {}
@@ -134,7 +134,7 @@ class TestCreateProxies(unittest.TestCase):
             'https': 'http://domain.com:3128',
             'no_proxy': "*.cisco.com"
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_empty_bypass_list(self):
         ops = {}
@@ -147,7 +147,7 @@ class TestCreateProxies(unittest.TestCase):
             'http': 'http://domain.com:3128',
             'https': 'http://domain.com:3128'
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_empty_http(self):
         ops = {}
@@ -158,13 +158,13 @@ class TestCreateProxies(unittest.TestCase):
             'http': 'http://domain.com:3128',
             'https': 'http://domain.com:3128'
         }
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_empty_proxies(self):
         proxy_options = {}
         dump = create_proxies(proxy_options)
         expected = {}
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
     def test_parse_error(self):
         ops = {}
@@ -189,11 +189,11 @@ class TestGetProxies(unittest.TestCase):
         url = "https://test.cisco.com"
         dump = get_proxies(proxies, url)
         expected = None
-        self.assertEquals(expected, dump)
+        self.assertEqual(expected, dump)
 
         url = "https://test.domain.com"
         dump = get_proxies(proxies, url)
-        self.assertEquals(proxies, dump)
+        self.assertEqual(proxies, dump)
 
 
 class TestBypassProxies(unittest.TestCase):
@@ -203,57 +203,57 @@ class TestBypassProxies(unittest.TestCase):
         no_proxy = "10.11.12.13:8080"
         url = "http://10.11.12.13:8080"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "*"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "*.cisco.com"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "10.11.38.0/24"
         url = "https://10.11.38.13"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "10.11.38.13"
         url = "https://10.11.38.13"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = ".cisco.com"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "*cisco.com"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
         no_proxy = "cisco.com"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(False, dump)
+        self.assertEqual(False, dump)
 
         no_proxy = "domain.com, cisco.com"
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(False, dump)
+        self.assertEqual(False, dump)
 
         no_proxy = ""
         url = "https://test.cisco.com"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(False, dump)
+        self.assertEqual(False, dump)
 
         no_proxy = "domain.net:8080"
         url = "http://domain.net:8080"
         dump = bypass_proxies(url, no_proxy)
-        self.assertEquals(True, dump)
+        self.assertEqual(True, dump)
 
 
 if __name__ == '__main__':

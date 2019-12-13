@@ -1,10 +1,10 @@
 """Module for the sample adapter classes."""
 
 from ..common.action_support.base import BaseAction
-from ..pythonutils.models.MySQL_target import MySQLTarget
-from ..pythonutils.models.MySQL_user import MySQLUser
-from ..pythonutils.mysql_adapter import MySQLAdapter
-from ..pythonutils.mysql_error import MySQLError
+from ..pythonutils.models.template_target import TemplateTarget
+from ..pythonutils.models.template_user import TemplateUser
+from ..pythonutils.template_adapter import TemplateAdapter
+from ..pythonutils.template_error import TemplateError
 from ..common.action_support.base import raise_action_error
 
 

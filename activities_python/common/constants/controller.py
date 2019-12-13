@@ -1,8 +1,8 @@
-"""Module for the controller constants. """
+"""Module with controller class constants."""
 
 
-class ControllerConstants(object):
-    """Class defining the Controller constants. """
+class ControllerConstants:
+    """Wrapper class for constants."""
 
     ACTIVITY_STATUS = 'activity_status'
     ERROR_DESC = 'error'

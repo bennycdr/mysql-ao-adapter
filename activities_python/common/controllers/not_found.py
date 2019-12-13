@@ -1,15 +1,16 @@
-"""Module for the not-found controller. """
+"""Module for the not-found controller."""
 
-from activities_python.common.controllers.base import BaseController
-from activities_python.common.factories.logger import produce_logger
-from activities_python.common.models.response import ControllerResponse
+from .base import BaseController
+from ..models.response import ControllerResponse
+from ..factories.logger import produce_logger
 
 
 class NotFoundController(BaseController):
-    """Controller for handling requests to invalid paths. """
+    """Class for sending not found."""
 
     def __init__(self, options):
         self.logger = produce_logger(options)
+        BaseController.__init__(NotFoundController, self)
 
     def handle(self, data, context):
         """Handle incoming requests to this controller. """
