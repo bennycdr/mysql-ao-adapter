@@ -1,4 +1,4 @@
-""Module containting the template adapter classes.  """
+""" Module containting the template adapter classes.  """
 import pymysql.cursors
 import requests
 
